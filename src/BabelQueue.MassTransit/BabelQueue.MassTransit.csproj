@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet package metadata -->
+    <PackageId>BabelQueue.MassTransit</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Muhammet Şafak</Authors>
+    <Company>BabelQueue</Company>
+    <Description>MassTransit adapter for BabelQueue — a System.Text.Json converter, publisher and configuration so MassTransit services produce/consume the canonical BabelQueue wire envelope.</Description>
+    <PackageProjectUrl>https://babelqueue.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BabelQueue/babelqueue-dotnet-masstransit</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>babelqueue;masstransit;queue;polyglot;messaging;rabbitmq</PackageTags>
+    <Copyright>Copyright (c) 2026 Muhammet Şafak</Copyright>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BabelQueue.Core" Version="0.1.0" />
+    <PackageReference Include="MassTransit" Version="8.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
