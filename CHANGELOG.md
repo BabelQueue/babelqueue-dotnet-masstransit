@@ -7,6 +7,20 @@ format is versioned separately by `meta.schema_version` (currently **1**).
 
 ## [Unreleased]
 
+### Added
+- **OTel `traceparent` propagation (ADR-0028).** `BabelQueuePublisher.PublishWithHeadersAsync(urn,
+  data, headers, queue, traceId)` writes an out-of-band header carrier (e.g. a W3C `traceparent`
+  from `Telemetry.PublishAsync(…, headers, …)`) onto `SendContext.Headers` — MassTransit's native
+  per-message metadata channel — **beside** the canonical envelope (GR-1), never inside it. The
+  consume side reads them back from `ConsumeContext.Headers` via
+  `MassTransitHeaders.Extract(ctx.Headers)` → `Dictionary<string,string>` to hand to
+  `Telemetry.Wrap(handler, headers)`, so a consumer span becomes a true child of the producer span;
+  with no `traceparent` it falls back to the v0.1 `trace_id` mapping (no regression). A header-less
+  send is identical to before.
+
+### Changed
+- Require `BabelQueue.Core 1.4.0` (the header-carrier seam version).
+
 ## [1.0.0] - 2026-06-07
 
 **1.0.0 — the public API is now SemVer-stable**: breaking changes require a MAJOR,

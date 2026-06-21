@@ -100,6 +100,34 @@ public class OrderConsumer : IConsumer<Envelope>
 }
 ```
 
+## OpenTelemetry `traceparent` propagation (ADR-0028)
+
+For true cross-hop **span** parent-child linkage, the active producer span's W3C `traceparent` rides
+on `SendContext.Headers` — MassTransit's native per-message metadata channel — **beside** the
+canonical envelope (never inside it). Produce with the header-aware overload; `BabelQueue.Core`'s
+`Telemetry.PublishAsync` fills the carrier:
+
+```csharp
+using BabelQueue.Tracing;
+
+var headers = new Dictionary<string, string>();
+await Telemetry.PublishAsync("urn:babel:orders:created", data, headers,
+    env => babelQueue.PublishWithHeadersAsync("urn:babel:orders:created", data, headers, "orders"));
+```
+
+A consumer reads them back from `ConsumeContext.Headers` and starts its span as a child:
+
+```csharp
+public Task Consume(ConsumeContext<Envelope> context)
+{
+    var headers = MassTransitHeaders.Extract(context.Headers);
+    return Telemetry.Wrap(async env => { /* ... */ }, headers)(context.Message);
+}
+```
+
+With no `traceparent` the consumer falls back to the v0.1 `trace_id` mapping; a header-less send is
+identical to `PublishAsync`. Requires `BabelQueue.Core 1.4.0`.
+
 ## Standalone converter
 
 The converter works with any `System.Text.Json` usage (not just MassTransit):

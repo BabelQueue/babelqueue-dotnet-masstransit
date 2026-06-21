@@ -32,10 +32,36 @@ public sealed class BabelQueuePublisher
         => PublishAsync(urn, data, _defaultQueue, null, cancellationToken);
 
     /// <summary>Publish a <c>(urn, data)</c> message to <paramref name="queue"/>, optionally continuing a trace.</summary>
-    public async Task<string> PublishAsync(
+    public Task<string> PublishAsync(
         string urn,
         IReadOnlyDictionary<string, object?> data,
         string queue,
+        string? traceId = null,
+        CancellationToken cancellationToken = default)
+        => PublishWithHeadersAsync(urn, data, headers: null, queue, traceId, cancellationToken);
+
+    /// <summary>
+    /// The header-aware (ADR-0028) counterpart of
+    /// <see cref="PublishAsync(string, IReadOnlyDictionary{string, object?}, string, string?, CancellationToken)"/>:
+    /// it sends the canonical envelope and writes the out-of-band <paramref name="headers"/> (e.g. a
+    /// W3C <c>traceparent</c> from <c>Telemetry.PublishAsync(..., headers, ...)</c>) onto the
+    /// message's <see cref="SendContext.Headers"/> — MassTransit's native metadata channel — beside
+    /// the frozen envelope (GR-1), never inside it. A consumer reads them back from
+    /// <c>ConsumeContext.Headers</c> via <see cref="MassTransitHeaders.Extract"/>. A <c>null</c>/empty
+    /// header map is identical to
+    /// <see cref="PublishAsync(string, IReadOnlyDictionary{string, object?}, string, string?, CancellationToken)"/>.
+    /// </summary>
+    /// <param name="urn">The message URN to publish.</param>
+    /// <param name="data">The message payload.</param>
+    /// <param name="headers">The out-of-band transport headers to ride beside the envelope.</param>
+    /// <param name="queue">The destination queue (falls back to the default when blank).</param>
+    /// <param name="traceId">An existing trace id to continue, or <c>null</c> to mint one.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public async Task<string> PublishWithHeadersAsync(
+        string urn,
+        IReadOnlyDictionary<string, object?> data,
+        IReadOnlyDictionary<string, string>? headers,
+        string? queue = null,
         string? traceId = null,
         CancellationToken cancellationToken = default)
     {
@@ -45,7 +71,9 @@ public sealed class BabelQueuePublisher
         var endpoint = await _sendEndpointProvider
             .GetSendEndpoint(new Uri($"queue:{target}"))
             .ConfigureAwait(false);
-        await endpoint.Send(envelope, cancellationToken).ConfigureAwait(false);
+
+        var pipe = Pipe.Execute<SendContext<Envelope>>(context => MassTransitHeaders.Apply(context, headers));
+        await endpoint.Send(envelope, pipe, cancellationToken).ConfigureAwait(false);
 
         return envelope.Meta!.Id!;
     }

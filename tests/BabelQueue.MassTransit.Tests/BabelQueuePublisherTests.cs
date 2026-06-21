@@ -18,8 +18,8 @@ public class BabelQueuePublisherTests
         Envelope? sent = null;
         var endpoint = new Mock<ISendEndpoint>();
         endpoint
-            .Setup(e => e.Send(It.IsAny<Envelope>(), It.IsAny<CancellationToken>()))
-            .Callback<Envelope, CancellationToken>((message, _) => sent = message)
+            .Setup(e => e.Send(It.IsAny<Envelope>(), It.IsAny<IPipe<SendContext<Envelope>>>(), It.IsAny<CancellationToken>()))
+            .Callback<Envelope, IPipe<SendContext<Envelope>>, CancellationToken>((message, _, _) => sent = message)
             .Returns(Task.CompletedTask);
 
         Uri? endpointUri = null;
@@ -50,7 +50,7 @@ public class BabelQueuePublisherTests
     {
         var endpoint = new Mock<ISendEndpoint>();
         endpoint
-            .Setup(e => e.Send(It.IsAny<Envelope>(), It.IsAny<CancellationToken>()))
+            .Setup(e => e.Send(It.IsAny<Envelope>(), It.IsAny<IPipe<SendContext<Envelope>>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         Uri? endpointUri = null;
