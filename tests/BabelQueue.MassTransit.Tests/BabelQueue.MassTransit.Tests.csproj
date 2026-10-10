@@ -22,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="conformance/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/BabelQueue.MassTransit/BabelQueue.MassTransit.csproj" />
   </ItemGroup>
 

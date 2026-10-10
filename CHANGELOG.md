@@ -8,6 +8,12 @@ format is versioned separately by `meta.schema_version` (currently **1**).
 ## [Unreleased]
 
 ### Added
+- **Cross-SDK conformance (GR-5).** The canonical `conformance/` suite (v1.0.0) is vendored under
+  `tests/BabelQueue.MassTransit.Tests/conformance` and `BabelQueueConformanceTests` drives the
+  manifest's `cases`, `roundtrip`, `data_shape` and `forbidden_keys` sections through
+  `BabelEnvelopeJsonConverter` (deserialize accept/reject, serialize == `EnvelopeCodec.Encode`,
+  deserialize -> serialize unknown-key preservation). CI gains a `conformance` drift-guard job and `ci-green` now requires it.
+  Test-only; no change to the public API or the wire envelope.
 - **OTel `traceparent` propagation (ADR-0028).** `BabelQueuePublisher.PublishWithHeadersAsync(urn,
   data, headers, queue, traceId)` writes an out-of-band header carrier (e.g. a W3C `traceparent`
   from `Telemetry.PublishAsync(…, headers, …)`) onto `SendContext.Headers` — MassTransit's native
@@ -19,7 +25,8 @@ format is versioned separately by `meta.schema_version` (currently **1**).
   send is identical to before.
 
 ### Changed
-- Require `BabelQueue.Core 1.4.0` (the header-carrier seam version).
+- **Dependency floor:** `BabelQueue.Core` raised to **1.8.0** (was 1.4.0, the header-carrier seam version). 1.8.0 preserves
+  unknown top-level and `meta` envelope keys on re-emit (forward compatibility, GR-5); with 1.4.0 the converter dropped them.
 
 ## [1.0.0] - 2026-06-07
 

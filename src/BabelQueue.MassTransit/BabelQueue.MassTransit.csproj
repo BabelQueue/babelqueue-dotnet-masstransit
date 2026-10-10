@@ -32,7 +32,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BabelQueue.Core" Version="1.4.0" />
+    <PackageReference Include="BabelQueue.Core" Version="1.8.0" />
     <PackageReference Include="MassTransit" Version="8.1.0" />
   </ItemGroup>
 

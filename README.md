@@ -126,7 +126,7 @@ public Task Consume(ConsumeContext<Envelope> context)
 ```
 
 With no `traceparent` the consumer falls back to the v0.1 `trace_id` mapping; a header-less send is
-identical to `PublishAsync`. Requires `BabelQueue.Core 1.4.0`.
+identical to `PublishAsync`. The header seam needs `BabelQueue.Core` ≥ 1.4.0; the package itself depends on 1.8.0.
 
 ## Standalone converter
 
